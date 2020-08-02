@@ -1,0 +1,93 @@
+---
+title: "Tidy Tuesday - Palmer Penguins"
+author: "Zeynep Ersoy"
+output: html_notebook
+---
+
+```{r global_options, include = FALSE}
+# hide code
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r}
+# load libraries
+library(tidyverse)
+```
+
+```{r}
+# read data
+penguins.csv <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins.csv")
+
+penguins_raw.csv <- readr::read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-28/penguins_raw.csv")
+```
+
+```{r}
+# source geom-flat violin function
+source("https://gist.githubusercontent.com/benmarwick/2a1bb0133ff568cbe28d/raw/fb53bd97121f7f9ce947837ef1a4c65a73bffb3f/geom_flat_violin.R")
+```
+
+
+```{r}
+theme_plot <- theme(
+  text = element_text(size = 10),
+  axis.title.x = element_text(size = 16),
+  axis.title.y = element_text(size = 16),
+  axis.text = element_text(size = 14),
+  legend.title = element_text(size = 16),
+  legend.text = element_text(size = 16),
+  legend.position = "right",
+  plot.title = element_text(lineheight = .8, face = "bold", size = 16),
+  panel.border = element_blank(),
+  panel.grid.minor = element_blank(),
+  panel.grid.major = element_blank(),
+  axis.line.x = element_line(colour = "black", size = 0.5, linetype = "solid"),
+  axis.line.y = element_line(colour = "black", size = 0.5, linetype = "solid")
+)
+```
+
+
+```{r}
+# remove nas in body size
+library(tidyr)
+penguins.csv <- penguins.csv %>% drop_na(body_mass_g)
+```
+
+```{r}
+# plot
+plot <- ggplot(
+  data = penguins.csv,
+  aes(x = species, y = body_mass_g, fill = species)
+) +
+  geom_flat_violin(position = position_nudge(x = .2, y = 0), alpha = .8) +
+  geom_point(aes(y = body_mass_g, color = species),
+    position = position_jitter(width = .15), size = .5, alpha = 0.8
+  ) +
+  geom_boxplot(width = .1, outlier.shape = NA, alpha = 0.5) +
+  guides(fill = FALSE) +
+  guides(color = FALSE) +
+  scale_color_manual(values = c("darkorange", "purple", "cyan4")) +
+  scale_fill_manual(values = c("darkorange", "purple", "cyan4")) +
+  coord_flip() +
+  theme_minimal() +
+  labs(
+    title = "Body Mass Distribution of Palmer Penguins",
+    subtitle = "",
+    caption = "Data: Gorman, Williams & Fraser (2014) DOI: 10.1371/journal.pone.009008",
+    x = "Species",
+    y = "Body mass (g)"
+  ) +
+  theme_plot
+
+plot
+```
+
+
+```{r}
+# save plot
+ggsave("2020-07-28_Palmer_Penguins.png",
+  plot = plot,
+  width = 10.5,
+  height = 8.5
+)
+```
